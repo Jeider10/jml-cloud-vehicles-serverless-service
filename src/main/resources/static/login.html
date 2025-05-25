@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        body {
+            background-color: #003f87;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background-color: #003f87;
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background-color: #00cc88;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <h2>Bienvenido</h2>
+
+    <!-- Login Form -->
+    <div id="login-form">
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Clave">
+        <button onclick="iniciarSesion()">Iniciar Sesión</button>
+        <p id="error" style="color:red;"></p>
+    </div>
+
+    <!-- Select Options -->
+    <div id="opciones" class="hidden">
+        <label>Filial:</label>
+        <select id="subsidiary"></select>
+
+        <label>Oficina:</label>
+        <select id="branch"></select>
+
+        <label>Rol:</label>
+        <select id="role"></select>
+
+        <button onclick="confirmarSeleccion()">Continuar</button>
+    </div>
+</div>
+
+<script>
+    let sessionToken = "";
+
+    function iniciarSesion() {
+        const user = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+
+        fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userName: user, password: pass })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Login inválido");
+            return res.json();
+        })
+        .then(result => {
+            sessionToken = result.authorization;
+
+            document.getElementById("login-form").classList.add("hidden");
+            document.getElementById("opciones").classList.remove("hidden");
+
+            llenarSelect("subsidiary", result.options.subsidiaries, "subsidiaryCode", "subsidiaryName");
+            llenarSelect("branch", result.options.branches, "branchCode", "branchName");
+            llenarSelect("role", result.options.roles, "rolCode", "rolName");
+        })
+        .catch(err => {
+            document.getElementById("error").innerText = "Usuario o contraseña incorrectos.";
+        });
+    }
+
+    function llenarSelect(id, items, codeField, nameField) {
+        const select = document.getElementById(id);
+        select.innerHTML = '';
+        items.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item[codeField];
+            option.textContent = item[nameField];
+            select.appendChild(option);
+        });
+    }
+
+    function confirmarSeleccion() {
+        const username = document.getElementById("username").value;
+        const body = {
+            sessionToken: sessionToken,
+            authentication: { authenticationUserLogin: username },
+            subsidiaryCodeSelection: {
+                subsidiaryCodeDto: parseInt(document.getElementById("subsidiary").value),
+                subsidiaryNameDto: document.getElementById("subsidiary").selectedOptions[0].text
+            },
+            branchCodeSelection: {
+                branchCodeDto: parseInt(document.getElementById("branch").value),
+                branchNameDto: document.getElementById("branch").selectedOptions[0].text
+            },
+            rolCodeSelection: {
+                rolCodeDto: parseInt(document.getElementById("role").value),
+                rolNameDto: document.getElementById("role").selectedOptions[0].text
+            }
+        };
+
+        fetch("/auth/login/role-selection", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Confirmación fallida");
+            return res.json();
+        })
+        .then(() => {
+            localStorage.setItem("token", sessionToken);
+            window.location.href = "home.html";
+        })
+        .catch(err => {
+            alert("❌ Error al confirmar: " + err.message);
+        });
+    }
+</script>
+</body>
+</html>
