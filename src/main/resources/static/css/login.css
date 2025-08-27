@@ -1,0 +1,74 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to right, #141e30, #243b55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 1s ease-in-out;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-form h2 {
+  text-align: center;
+  color: #243b55;
+}
+
+.login-form input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.login-form input:focus {
+  border-color: #243b55;
+  outline: none;
+  box-shadow: 0 0 5px #243b55;
+}
+
+.login-form button {
+  padding: 0.75rem;
+  background-color: #243b55;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: #141e30;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
